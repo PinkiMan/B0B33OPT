@@ -22,7 +22,18 @@ def ar_fit_model(y: np.ndarray, p: int) -> np.ndarray:
 
     ret = np.zeros(p+1)
 
+    t = len(y)
 
+    M = []
+    M.append(np.ones(t - p))
+    for i in range(1, p + 1):
+        M.append(y[p-i:t-i])
+
+    M = np.array(M).T
+
+    b = y[p:]
+
+    ret = np.linalg.lstsq(M, b, rcond=None)[0]
 
     return ret
 
@@ -46,6 +57,9 @@ def ar_predict(a: np.ndarray, y0: np.ndarray, N:int) -> np.ndarray:
     y_pred = np.zeros(N)
     p = y0.shape[0]
     y_pred[:p] = y0
+
+    for t in range(p, N):
+        y_pred[t] = a[0] + a[1:] @ y_pred[t - p:t][::-1]
     
     return y_pred
 
